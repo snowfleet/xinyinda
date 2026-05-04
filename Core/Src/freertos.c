@@ -25,7 +25,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "Headfile.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -115,8 +115,15 @@ void StartDefaultTask(void *argument)
 {
   /* USER CODE BEGIN StartDefaultTask */
   /* Infinite loop */
+  motor_speed_t speed = {0, 0, 0, 0};
+  speed.speed_m1 = 20;
+  speed.speed_m2 = 20;
+  speed.speed_m3 = 20;
+  speed.speed_m4 = 20;
+  motor_init();
   for(;;)
   {
+    motor_set_speed(speed);
     osDelay(1);
   }
   /* USER CODE END StartDefaultTask */
