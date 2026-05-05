@@ -18,6 +18,7 @@ void LCD_Show_Task(void* param)
     LCD_Show_Init();
 	volatile int i = 0;
     char Text[20];
+    HAL_TIM_Base_Start(&htim3);
     
     volatile uint16_t V = 0;
     
@@ -46,7 +47,7 @@ void LCD_Show_Task(void* param)
         snprintf(Text, sizeof(Text), "Distance = %.2f      ", distance);
         LCD_DisplayText(10, 60, Text);
 
-        vTaskDelay(1000);
+        vTaskDelay(100);
     }
     
 }
