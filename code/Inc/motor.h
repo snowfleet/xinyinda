@@ -19,11 +19,10 @@
 #define MOTOR_TYPE_N20                    2 		//N20编码电机
 #define MOTOR_TYPE_JGB                    3 		//磁环每转是44个脉冲   减速比:90  默认
 
-int8_t motor_init(void);
-int8_t I2C_Write_motor(uint16_t Reg_ADDR, uint8_t *Buf, uint16_t Len);
-int8_t I2C_Read_motor(uint16_t Reg_ADDR, uint8_t *Buf, uint16_t Len);
-int8_t motor_set_speed(motor_speed_t speed);
-int8_t motor_read_Encoder(motor_encoder_t* encoder);
-uint16_t motor_read_Vol(void);
+void Motor_Set_Speed(motor_speed_t speed);
+void Motor_Init(void);
+uint16_t Motor_Get_Vol(void);
+void Motor_Get_Encoder(motor_encoder_t* Encoder);
+void Motor_Reset_Encoder(void);
 
 #endif

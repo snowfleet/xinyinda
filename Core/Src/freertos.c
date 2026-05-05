@@ -71,6 +71,12 @@ void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
   */
 void MX_FREERTOS_Init(void) {
   /* USER CODE BEGIN Init */
+  InitDelay(168);
+  IIC_init();
+  Motor_Init();
+  Motor1_Init();
+
+
 
   /* USER CODE END Init */
 
@@ -92,10 +98,18 @@ void MX_FREERTOS_Init(void) {
 
   /* Create the thread(s) */
   /* creation of defaultTask */
-  defaultTaskHandle = osThreadNew(StartDefaultTask, NULL, &defaultTask_attributes);
+//  defaultTaskHandle = osThreadNew(StartDefaultTask, NULL, &defaultTask_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
+
+  BaseType_t ret = xTaskCreate(LCD_Show_Task,"LCD_Show_task", 2048, NULL, 1, NULL);
+  if(ret != pdPASS)
+  {
+      while(1);
+  }
+
+
   /* USER CODE END RTOS_THREADS */
 
   /* USER CODE BEGIN RTOS_EVENTS */
@@ -115,16 +129,10 @@ void StartDefaultTask(void *argument)
 {
   /* USER CODE BEGIN StartDefaultTask */
   /* Infinite loop */
-  motor_speed_t speed = {0, 0, 0, 0};
-  speed.speed_m1 = 20;
-  speed.speed_m2 = 20;
-  speed.speed_m3 = 20;
-  speed.speed_m4 = 20;
-  motor_init();
+
   for(;;)
   {
-    motor_set_speed(speed);
-    osDelay(1);
+    
   }
   /* USER CODE END StartDefaultTask */
 }

@@ -24,6 +24,10 @@
 #include "lcd_spi_154.h"
 #include "motor.h"
 #include "Typies.h"
+#include "Delay.h"
+#include "IIC.h"
+#include "LCD_Show.h"
+#include "motor_1.h"   
 
 
 
