@@ -1,6 +1,7 @@
 #include "Headfile.h"
 #include "LCD_Show.h"
 
+
 static void LCD_Show_Init(void)
 {
     SPI_LCD_Init();
@@ -30,23 +31,20 @@ void LCD_Show_Task(void* param)
     
     while (1)
     {
-        
-        LCD_Clear();
-        LCD_DisplayText(10, 20,"hhh");
 
-        
         Motor_Set_Speed(speed);
-		i++;
-		LCD_DisplayNumber(10, 80, i, 6);
-        vTaskDelay(100);
         Motor_Get_Encoder(&Encoder);
-        snprintf(Text, sizeof(Text), "Encoder = %d", Encoder.encoder_m1);
-        LCD_DisplayText(10, 100, Text);
+        
+        snprintf(Text, sizeof(Text), "Encoder = %d        ", Encoder.encoder_m1);
+        LCD_DisplayText(10, 20, Text);
 
         V = Motor_Get_Vol();
-		snprintf(Text, sizeof(Text), "V = %dmV", V);
+		snprintf(Text, sizeof(Text), "V = %dmV       ", V);
         LCD_DisplayText(10, 40, Text);
 
+        float distance = HCSR04_Get_Distance();
+        snprintf(Text, sizeof(Text), "Distance = %.2f      ", distance);
+        LCD_DisplayText(10, 60, Text);
 
         vTaskDelay(1000);
     }

@@ -13,21 +13,21 @@
 #include "i2c.h"
 #include "gpio.h"
 #include "spi.h"
-#include "dma.h"
+#include "tim.h"
 #include "freertos.h"
 #include "task.h"
 #include "queue.h"
 #include "main.h"
 
-
-
-#include "lcd_spi_154.h"
-#include "motor.h"
 #include "Typies.h"
 #include "Delay.h"
 #include "IIC.h"
+#include "lcd_spi_154.h"
+
 #include "LCD_Show.h"
-#include "motor_1.h"   
+#include "motor.h"
+#include "HCSR04.h"
+
 
 
 
