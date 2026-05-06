@@ -38,9 +38,9 @@ void IIC_start()
 	I2C_SDA_OUT();
 	HAL_GPIO_WritePin(GPIOX, IIC_IO_SDA, GPIO_PIN_SET);
 	HAL_GPIO_WritePin(GPIOX, IIC_IO_SCL, GPIO_PIN_SET);
-	DelayUs(10);  // 加长延时
+	DelayUs(5);  // 加长延时
 	HAL_GPIO_WritePin(GPIOX, IIC_IO_SDA, GPIO_PIN_RESET);
-	DelayUs(10);
+	DelayUs(5);
 	HAL_GPIO_WritePin(GPIOX, IIC_IO_SCL, GPIO_PIN_RESET);
 }
 
@@ -49,10 +49,10 @@ void IIC_stop()
 	I2C_SDA_OUT();
 	HAL_GPIO_WritePin(GPIOX, IIC_IO_SCL, GPIO_PIN_RESET);
 	HAL_GPIO_WritePin(GPIOX, IIC_IO_SDA, GPIO_PIN_RESET);
-	DelayUs(10);
+	DelayUs(5);
 	HAL_GPIO_WritePin(GPIOX, IIC_IO_SCL, GPIO_PIN_SET);
 	HAL_GPIO_WritePin(GPIOX, IIC_IO_SDA, GPIO_PIN_SET);
-	DelayUs(10);
+	DelayUs(5);	
 }
 
 void IIC_ack()

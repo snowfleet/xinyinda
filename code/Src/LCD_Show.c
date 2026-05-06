@@ -8,7 +8,7 @@ static void LCD_Show_Init(void)
     LCD_SetBackColor(LCD_WHITE);
     LCD_Clear();
     LCD_SetTextFont(&CH_Font24); 
-    LCD_SetColor(LCD_BLACK);
+    LCD_SetColor(LCD_RED);
 
 }
 
@@ -31,23 +31,14 @@ void LCD_Show_Task(void* param)
 
     motor_encoder_t Encoder;
 
-    uint16_t Angle = 0;
-    int8_t dir = 1;
+    uint16_t Angle = 90;
+    int8_t dir = 1;         //0表示在左边，1表示在正中间， -1表示在右边
+
+    uint32_t last_time = 0;
     
     while (1)
     {
-        Angle += dir * 10;
-        if (Angle >= 180)
-        {
-            Angle = 180;
-            dir = -1;
-        }
-        else if (Angle <= 0)
-        {
-            Angle = 0;
-            dir = 1;
-        }
-        Servo_SetAngle(Angle);
+        
         Motor_Set_Speed(speed);
         Motor_Get_Encoder(&Encoder);
         
@@ -61,6 +52,32 @@ void LCD_Show_Task(void* param)
         float distance = HCSR04_Get_Distance();
         snprintf(Text, sizeof(Text), "Distance = %.2f      ", distance);
         LCD_DisplayText(10, 60, Text);
+
+        // if(distance <= 5.0f && HAL_GetTick() - last_time > 1000)
+        // {
+        //     last_time = HAL_GetTick();
+        //     switch(dir)
+        //     {
+        //         case 0:         //左边
+        //             dir = 1;
+        //             Angle = 90;
+        //             break;
+        //         case 1:         //中间
+        //             dir = -1;
+        //             Angle = 0;
+        //             break;
+        //         case -1:        //右边
+        //             dir = 0;
+        //             Angle = 180;
+        //             break;
+
+        //         default:break;
+        //     }
+            
+            
+        // }
+
+        // Servo_SetAngle(Angle);
 
         vTaskDelay(pdMS_TO_TICKS(500));
     }
