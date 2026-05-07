@@ -207,3 +207,213 @@ int8_t I2C_Write_Len(int8_t Reg,int8_t *Buf,int8_t Len)
 	IIC_stop();
 	return 0;
 }
+
+// ==================== IIC2 模块(服务巡线模块) ====================
+
+void I2C2_SDA_OUT(void)
+{
+  GPIO_InitTypeDef IIC2_GPIO_InitStructure;
+	IIC2_GPIO_InitStructure.Pin=IIC2_IO_SDA;
+	IIC2_GPIO_InitStructure.Speed=GPIO_SPEED_FREQ_HIGH;
+	IIC2_GPIO_InitStructure.Mode=GPIO_MODE_OUTPUT_OD;
+	IIC2_GPIO_InitStructure.Pull=GPIO_PULLUP;
+	HAL_GPIO_Init(GPIOX2,&IIC2_GPIO_InitStructure);
+}
+
+void I2C2_SDA_IN(void)
+{
+	GPIO_InitTypeDef IIC2_GPIO_InitStructure;
+	IIC2_GPIO_InitStructure.Pin=IIC2_IO_SDA;
+	IIC2_GPIO_InitStructure.Speed=GPIO_SPEED_FREQ_HIGH;
+	IIC2_GPIO_InitStructure.Mode=GPIO_MODE_INPUT;
+	IIC2_GPIO_InitStructure.Pull=GPIO_PULLUP;
+	HAL_GPIO_Init(GPIOX2,&IIC2_GPIO_InitStructure);
+}
+
+void IIC2_init()
+{
+	GPIO_InitTypeDef IIC2_GPIO_InitStructure;
+	__HAL_RCC_GPIOC_CLK_ENABLE();
+	IIC2_GPIO_InitStructure.Pin = IIC2_IO_SDA |IIC2_IO_SCL;
+	IIC2_GPIO_InitStructure.Mode = GPIO_MODE_OUTPUT_OD;
+	IIC2_GPIO_InitStructure.Pull = GPIO_PULLUP;
+	IIC2_GPIO_InitStructure.Speed = GPIO_SPEED_FREQ_HIGH;
+	HAL_GPIO_Init(GPIOX2, &IIC2_GPIO_InitStructure);
+	HAL_GPIO_WritePin(GPIOX2,IIC2_IO_SDA|IIC2_IO_SCL, GPIO_PIN_SET);
+}
+
+void IIC2_start()
+{
+	I2C2_SDA_OUT();
+	HAL_GPIO_WritePin(GPIOX2, IIC2_IO_SDA, GPIO_PIN_SET);
+	HAL_GPIO_WritePin(GPIOX2, IIC2_IO_SCL, GPIO_PIN_SET);
+	DelayUs(25);  // 加长延时
+	HAL_GPIO_WritePin(GPIOX2, IIC2_IO_SDA, GPIO_PIN_RESET);
+	DelayUs(25);
+	HAL_GPIO_WritePin(GPIOX2, IIC2_IO_SCL, GPIO_PIN_RESET);
+}
+
+void IIC2_stop()
+{
+	I2C2_SDA_OUT();
+	HAL_GPIO_WritePin(GPIOX2, IIC2_IO_SCL, GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(GPIOX2, IIC2_IO_SDA, GPIO_PIN_RESET);
+	DelayUs(25);
+	HAL_GPIO_WritePin(GPIOX2, IIC2_IO_SCL, GPIO_PIN_SET);
+	HAL_GPIO_WritePin(GPIOX2, IIC2_IO_SDA, GPIO_PIN_SET);
+	DelayUs(25);	
+}
+
+void IIC2_ack()
+{
+	HAL_GPIO_WritePin(GPIOX2, IIC2_IO_SCL, GPIO_PIN_RESET);
+	I2C2_SDA_OUT();
+  HAL_GPIO_WritePin(GPIOX2, IIC2_IO_SDA, GPIO_PIN_RESET);
+  DelayUs(25);
+  HAL_GPIO_WritePin(GPIOX2, IIC2_IO_SCL, GPIO_PIN_SET);
+  DelayUs(25);
+  HAL_GPIO_WritePin(GPIOX2, IIC2_IO_SCL, GPIO_PIN_RESET);
+}
+
+void IIC2_noack()
+{
+	HAL_GPIO_WritePin(GPIOX2, IIC2_IO_SCL, GPIO_PIN_RESET);
+	I2C2_SDA_OUT();
+  HAL_GPIO_WritePin(GPIOX2, IIC2_IO_SDA, GPIO_PIN_SET);
+  DelayUs(25);	
+  HAL_GPIO_WritePin(GPIOX2, IIC2_IO_SCL, GPIO_PIN_SET);
+  DelayUs(25);	
+  HAL_GPIO_WritePin(GPIOX2, IIC2_IO_SCL, GPIO_PIN_RESET);
+}
+
+uint8_t IIC2_wait_ack()
+{
+	uint8_t tempTime=0;
+	I2C2_SDA_IN();
+	HAL_GPIO_WritePin(GPIOX2, IIC2_IO_SDA, GPIO_PIN_SET);
+	DelayUs(25);
+	HAL_GPIO_WritePin(GPIOX2, IIC2_IO_SCL, GPIO_PIN_SET);
+	DelayUs(25);
+
+	while(HAL_GPIO_ReadPin(GPIOX2, IIC2_IO_SDA))
+	{
+		tempTime++;
+		if(tempTime>150)  // 超时加长，更稳
+		{
+			IIC2_stop();
+			return 1;
+		}
+	}
+	HAL_GPIO_WritePin(GPIOX2, IIC2_IO_SCL, GPIO_PIN_RESET);
+	return 0;
+}
+
+void IIC2_send_byte(uint8_t txd)
+{
+	uint8_t i=0;
+	I2C2_SDA_OUT();
+	HAL_GPIO_WritePin(GPIOX2, IIC2_IO_SCL, GPIO_PIN_RESET);
+	for(i=0;i<8;i++)
+	{
+		if(txd&0x80)
+			HAL_GPIO_WritePin(GPIOX2, IIC2_IO_SDA, GPIO_PIN_SET);
+		else
+			HAL_GPIO_WritePin(GPIOX2, IIC2_IO_SDA, GPIO_PIN_RESET);
+		txd<<=1;
+		DelayUs(25);
+		HAL_GPIO_WritePin(GPIOX2, IIC2_IO_SCL, GPIO_PIN_SET);
+		DelayUs(25);
+		HAL_GPIO_WritePin(GPIOX2, IIC2_IO_SCL, GPIO_PIN_RESET);
+		DelayUs(25);	
+	}
+}
+
+uint8_t IIC2_read_byte(uint8_t ack)
+{
+	uint8_t i=0,receive=0;
+	I2C2_SDA_IN();
+  for(i=0;i<8;i++)
+  {
+   	HAL_GPIO_WritePin(GPIOX2, IIC2_IO_SCL, GPIO_PIN_RESET);
+		DelayUs(25);
+		HAL_GPIO_WritePin(GPIOX2, IIC2_IO_SCL, GPIO_PIN_SET);
+		DelayUs(25); 
+		DelayUs(25);
+		receive<<=1;
+		if(HAL_GPIO_ReadPin(GPIOX2, IIC2_IO_SDA))
+		   receive++;
+		DelayUs(25);
+  }
+
+  if(!ack)
+	  IIC2_noack();
+	else
+		IIC2_ack();
+
+	return receive;
+}
+
+// 读数据
+uint8_t I2C2_Read_Len(uint8_t Reg,uint8_t *Buf,uint8_t Len)
+{
+	uint8_t i;
+	IIC2_start();
+	IIC2_send_byte((IR_DEV_ADDR << 1) | 0);
+	if(IIC2_wait_ack() == 1)
+	{
+		IIC2_stop();
+		return 1;
+	}
+	IIC2_send_byte(Reg);
+	if(IIC2_wait_ack() == 1)
+	{
+		IIC2_stop();
+		return 1;
+	}
+	IIC2_start();
+	IIC2_send_byte((IR_DEV_ADDR << 1) | 1);
+	if(IIC2_wait_ack() == 1)
+	{
+		IIC2_stop();
+		return 1;
+	}
+	for(i=0;i<Len;i++)
+	{
+		if(i != Len-1)
+			Buf[i] = IIC2_read_byte(1);
+		else
+			Buf[i] = IIC2_read_byte(0);
+	}
+	IIC2_stop();
+	return 0;
+}
+
+// 写数据
+int8_t I2C2_Write_Len(int8_t Reg,int8_t *Buf,int8_t Len)
+{
+	uint8_t i;
+	IIC2_start();
+	IIC2_send_byte((IR_DEV_ADDR << 1) | 0);
+	if(IIC2_wait_ack() == 1)
+	{
+		IIC2_stop();
+		return 1;
+	}
+	IIC2_send_byte(Reg);
+	if(IIC2_wait_ack() == 1)
+	{
+		IIC2_stop();
+		return 1;
+	}
+	for(i =0;i<Len;i++)
+	{
+		IIC2_send_byte(Buf[i]);
+		if(IIC2_wait_ack() == 1)
+		{
+			IIC2_stop();
+			return 1;
+		}
+	}
+	IIC2_stop();
+	return 0;
+}

@@ -79,6 +79,12 @@ void LCD_Show_Task(void* param)
 
         // Servo_SetAngle(Angle);
 
+        uint8_t s1,s2,s3,s4,s5,s6,s7,s8;
+        irtacking_Read(&s1,&s2,&s3,&s4,&s5,&s6,&s7,&s8);
+        snprintf(Text, sizeof(Text), "%d%d%d%d%d%d%d%d", s1,s2,s3,s4,s5,s6,s7,s8);
+        LCD_DisplayText(10, 80, Text);
+        
+        
         vTaskDelay(pdMS_TO_TICKS(500));
     }
     

@@ -1,24 +1,21 @@
 #include "irtracking.h"
 #include "Headfile.h"
 
+
 void irtacking_Read(uint8_t *s1,uint8_t *s2,uint8_t *s3,uint8_t *s4,uint8_t *s5,uint8_t *s6,uint8_t *s7,uint8_t *s8)
 {
-    uint8_t irtacking_data;
-    //设备地址0x12，寄存器地址0x30
-    HAL_I2C_Mem_Read(&hi2c3, 0x12, 0x30, I2C_MEMADD_SIZE_8BIT, &irtacking_data, 1, 100);
+    uint8_t irtacking_data = 0x00;
+    I2C2_Read_Len(IR_READ_ADDR, &irtacking_data, 1);
 
 
-    //数据处理
-    *s1 = (irtacking_data >> 0) & 0x01;
-	*s2 = (irtacking_data >> 1) & 0x01;
-	*s3 = (irtacking_data >> 2) & 0x01;
-	*s4 = (irtacking_data >> 3) & 0x01;
-	*s5 = (irtacking_data >> 4) & 0x01;
-	*s6 = (irtacking_data >> 5) & 0x01;
-	*s7 = (irtacking_data >> 6) & 0x01;
-	*s8 = (irtacking_data >> 7) & 0x01;
-
-
+    *s1 = (irtacking_data >> 7) & 0x01;
+    *s2 = (irtacking_data >> 6) & 0x01;
+    *s3 = (irtacking_data >> 5) & 0x01;
+    *s4 = (irtacking_data >> 4) & 0x01;
+    *s5 = (irtacking_data >> 3) & 0x01;
+    *s6 = (irtacking_data >> 2) & 0x01;
+    *s7 = (irtacking_data >> 1) & 0x01;
+    *s8 = (irtacking_data >> 0) & 0x01;
 }
 
 //巡线探头的处理
@@ -187,5 +184,3 @@ void LineWalking(void)
 	// Motion_Ctrl(IRR_SPEED, 0, pid_output_IRR, 0);
 
 }
-
-
