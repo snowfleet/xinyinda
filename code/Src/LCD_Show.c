@@ -3,6 +3,11 @@
 
 
 
+/**
+ * @brief  LCD显示初始化
+ * @param  无
+ * @retval 无
+ */
 static void LCD_Show_Init(void)
 {
     SPI_LCD_Init();
@@ -13,6 +18,11 @@ static void LCD_Show_Init(void)
 
 }
 
+/**
+ * @brief  LCD显示任务
+ * @param  param: 任务参数
+ * @retval 无
+ */
 void LCD_Show_Task(void* param)
 {
     

@@ -19,7 +19,11 @@
 
 extern SPI_HandleTypeDef hspi1;
 
-// SPI发送1字节
+/**
+ * @brief  SPI发送1字节数据
+ * @param  data: 要发送的数据
+ * @retval 接收到的数据
+ */
 uint8_t SPI1SendByte(uint8_t data) {
 	unsigned char writeCommand[1];
 	unsigned char readValue[1];
@@ -30,8 +34,12 @@ uint8_t SPI1SendByte(uint8_t data) {
 
 }
 
-
-// SPI写寄存器
+/**
+ * @brief  SPI写寄存器
+ * @param  address: 寄存器地址
+ * @param  value: 要写入的值
+ * @retval 无
+ */
 void SPI1_WriteReg(uint8_t address, uint8_t value) {
 	cs_reset();
 	SPI1SendByte(address);
@@ -39,7 +47,11 @@ void SPI1_WriteReg(uint8_t address, uint8_t value) {
 	cs_set();
 }
 
-// SPI读寄存器
+/**
+ * @brief  SPI读寄存器
+ * @param  address: 寄存器地址
+ * @retval 寄存器值
+ */
 uint8_t SPI1_ReadReg(uint8_t address) {
 	uint8_t	val;
 
@@ -50,12 +62,22 @@ uint8_t SPI1_ReadReg(uint8_t address) {
 	return val;
 }
 
-// RC522写寄存器函数
+/**
+ * @brief  RC522写寄存器函数
+ * @param  addr: 寄存器地址
+ * @param  val: 要写入的值
+ * @retval 无
+ */
 void MFRC522_WriteRegister(uint8_t addr, uint8_t val) {
 	addr = (addr << 1) & 0x7E;
   SPI1_WriteReg(addr, val);
 }
-// RC522读寄存器函数
+
+/**
+ * @brief  RC522读寄存器函数
+ * @param  addr: 寄存器地址
+ * @retval 寄存器值
+ */
 uint8_t MFRC522_ReadRegister(uint8_t addr) {
 	uint8_t val;
 
@@ -64,6 +86,11 @@ uint8_t MFRC522_ReadRegister(uint8_t addr) {
 	return val;	
 }
 
+/**
+ * @brief  检测是否有卡片
+ * @param  id: 卡片ID缓冲区
+ * @retval MI_OK: 检测到卡片, MI_ERR: 未检测到卡片
+ */
 uint8_t MFRC522_Check(uint8_t* id) {
 	uint8_t status;
 	status = MFRC522_Request(PICC_REQIDL, id);
@@ -72,6 +99,12 @@ uint8_t MFRC522_Check(uint8_t* id) {
 	return status;
 }
 
+/**
+ * @brief  比较两张卡片ID是否相同
+ * @param  CardID: 当前卡片ID
+ * @param  CompareID: 要比较的卡片ID
+ * @retval MI_OK: 相同, MI_ERR: 不同
+ */
 uint8_t MFRC522_Compare(uint8_t* CardID, uint8_t* CompareID) {
 	uint8_t i;
 	for (i = 0; i < 5; i++) {
@@ -80,10 +113,22 @@ uint8_t MFRC522_Compare(uint8_t* CardID, uint8_t* CompareID) {
 	return MI_OK;
 }
 
+/**
+ * @brief  设置寄存器位掩码
+ * @param  reg: 寄存器地址
+ * @param  mask: 要设置的掩码
+ * @retval 无
+ */
 void MFRC522_SetBitMask(uint8_t reg, uint8_t mask) {
 	MFRC522_WriteRegister(reg, MFRC522_ReadRegister(reg) | mask);
 }
 
+/**
+ * @brief  清除寄存器位掩码
+ * @param  reg: 寄存器地址
+ * @param  mask: 要清除的掩码
+ * @retval 无
+ */
 void MFRC522_ClearBitMask(uint8_t reg, uint8_t mask){
 	MFRC522_WriteRegister(reg, MFRC522_ReadRegister(reg) & (~mask));
 }
@@ -101,6 +146,12 @@ void MFRC522_ClearBitMask(uint8_t reg, uint8_t mask){
 					0x0800 = Mifare_Pro(X)
 					0x4403 = Mifare_DESFire
 */
+/**
+ * @brief  寻卡
+ * @param  reqMode: 寻卡方式，0x26=寻未休眠卡，0x52=寻所有卡
+ * @param  TagType: 卡片类型代码缓冲区
+ * @retval MI_OK: 寻卡成功, MI_ERR: 寻卡失败
+ */
 uint8_t MFRC522_Request(uint8_t reqMode, uint8_t* TagType) {
 	uint8_t status;  
 	uint16_t backBits;
@@ -111,6 +162,7 @@ uint8_t MFRC522_Request(uint8_t reqMode, uint8_t* TagType) {
 	if ((status != MI_OK) || (backBits != 0x10)) status = MI_ERR;
 	return status;
 }
+
 /*
 函数功能: 通过RC522和ISO14443卡通讯
           command: RC522命令字
@@ -119,6 +171,15 @@ uint8_t MFRC522_Request(uint8_t reqMode, uint8_t* TagType) {
           backData: 接收到的卡片返回数据
           backLen: 返回数据的位长度
 */
+/**
+ * @brief  通过RC522和ISO14443卡通讯
+ * @param  command: RC522命令字
+ * @param  sendData: 发送到卡片的数据
+ * @param  sendLen: 发送数据的字节长度
+ * @param  backData: 接收到的卡片返回数据
+ * @param  backLen: 返回数据的位长度
+ * @retval MI_OK: 通讯成功, MI_ERR: 通讯失败
+ */
 uint8_t MFRC522_ToCard(uint8_t command, uint8_t* sendData, uint8_t sendLen, uint8_t* backData, uint16_t* backLen) {
 	uint8_t status = MI_ERR;
 	uint8_t irqEn = 0x00;
@@ -176,7 +237,12 @@ uint8_t MFRC522_ToCard(uint8_t command, uint8_t* sendData, uint8_t sendLen, uint
 	}
 	return status;
 }
-// 防冲突
+
+/**
+ * @brief  防冲突处理，获取卡片序列号
+ * @param  serNum: 卡片序列号缓冲区，5字节
+ * @retval MI_OK: 成功, MI_ERR: 失败
+ */
 uint8_t MFRC522_Anticoll(uint8_t* serNum) {
 	uint8_t status;
 	uint8_t i;
@@ -193,7 +259,14 @@ uint8_t MFRC522_Anticoll(uint8_t* serNum) {
 	}
 	return status;
 } 
-// 计算CRC
+
+/**
+ * @brief  计算CRC校验值
+ * @param  pIndata: 输入数据指针
+ * @param  len: 数据长度
+ * @param  pOutData: CRC结果缓冲区，2字节
+ * @retval 无
+ */
 void MFRC522_CalculateCRC(uint8_t*  pIndata, uint8_t len, uint8_t* pOutData) {
 	uint8_t i, n;
 
@@ -212,7 +285,12 @@ void MFRC522_CalculateCRC(uint8_t*  pIndata, uint8_t len, uint8_t* pOutData) {
 	pOutData[0] = MFRC522_ReadRegister(MFRC522_REG_CRC_RESULT_L);
 	pOutData[1] = MFRC522_ReadRegister(MFRC522_REG_CRC_RESULT_M);
 }
-// 选择卡片
+
+/**
+ * @brief  选择卡片
+ * @param  serNum: 卡片序列号，5字节
+ * @retval 卡片容量大小，0表示失败
+ */
 uint8_t MFRC522_SelectTag(uint8_t* serNum) {
 	uint8_t i;
 	uint8_t status;
@@ -228,6 +306,7 @@ uint8_t MFRC522_SelectTag(uint8_t* serNum) {
 	if ((status == MI_OK) && (recvBits == 0x18)) size = buffer[0]; else size = 0;
 	return size;
 }
+
 /*
 	验证卡片密码
 	authMode: 密码验证模式
@@ -237,6 +316,14 @@ uint8_t MFRC522_SelectTag(uint8_t* serNum) {
 	Sectorkey: 扇区密码
 	serNum: 卡片序列号，4字节
 */
+/**
+ * @brief  验证卡片密码
+ * @param  authMode: 密码验证模式，0x60=A密钥，0x61=B密钥
+ * @param  BlockAddr: 块地址
+ * @param  Sectorkey: 扇区密码，6字节
+ * @param  serNum: 卡片序列号，4字节
+ * @retval MI_OK: 验证成功, MI_ERR: 验证失败
+ */
 uint8_t MFRC522_Auth(uint8_t authMode, uint8_t BlockAddr, uint8_t* Sectorkey, uint8_t* serNum) {
 	uint8_t status;
 	uint16_t recvBits;
@@ -251,7 +338,13 @@ uint8_t MFRC522_Auth(uint8_t authMode, uint8_t BlockAddr, uint8_t* Sectorkey, ui
 	if ((status != MI_OK) || (!(MFRC522_ReadRegister(MFRC522_REG_STATUS2) & 0x08))) status = MI_ERR;
 	return status;
 }
-// RC522读取M1卡一个块数据 blockAddr:块地址  recvData:读取到的卡片数据，16字节
+
+/**
+ * @brief  读取M1卡一个块数据
+ * @param  blockAddr: 块地址
+ * @param  recvData: 读取到的卡片数据缓冲区，16字节
+ * @retval MI_OK: 读取成功, MI_ERR: 读取失败
+ */
 uint8_t MFRC522_Read(uint8_t blockAddr, uint8_t* recvData) {
 	uint8_t status;
 	uint16_t unLen;
@@ -264,7 +357,12 @@ uint8_t MFRC522_Read(uint8_t blockAddr, uint8_t* recvData) {
 	return status;
 }
 
-// RC522写数据，将数据写入M1卡指定块  blockAddr:块地址   writeData:要写入的数据，16字节
+/**
+ * @brief  写数据到M1卡指定块
+ * @param  blockAddr: 块地址
+ * @param  writeData: 要写入的数据，16字节
+ * @retval MI_OK: 写入成功, MI_ERR: 写入失败
+ */
 uint8_t MFRC522_Write(uint8_t blockAddr, uint8_t* writeData) {
 	uint8_t status;
 	uint16_t recvBits;
@@ -284,7 +382,12 @@ uint8_t MFRC522_Write(uint8_t blockAddr, uint8_t* writeData) {
 	}
 	return status;
 }
-// RC522初始化 ISO14443_A
+
+/**
+ * @brief  RC522初始化，配置ISO14443_A协议参数
+ * @param  无
+ * @retval 无
+ */
 void MFRC522_Init(void) {
 	MFRC522_Reset();
 	MFRC522_WriteRegister(MFRC522_REG_T_MODE, 0x8D);
@@ -298,23 +401,42 @@ void MFRC522_Init(void) {
 	MFRC522_WriteRegister(MFRC522_REG_MODE, 0x3D);
 	MFRC522_AntennaOn();
 }
-// RC522复位
+
+/**
+ * @brief  RC522复位
+ * @param  无
+ * @retval 无
+ */
 void MFRC522_Reset(void) {
 	MFRC522_WriteRegister(MFRC522_REG_COMMAND, PCD_RESETPHASE);
 }
-// RC522开启天线
+
+/**
+ * @brief  RC522开启天线
+ * @param  无
+ * @retval 无
+ */
 void MFRC522_AntennaOn(void) {
 	uint8_t temp;
 
 	temp = MFRC522_ReadRegister(MFRC522_REG_TX_CONTROL);
 	if (!(temp & 0x03)) MFRC522_SetBitMask(MFRC522_REG_TX_CONTROL, 0x03);
 }
-// RC522关闭天线
+
+/**
+ * @brief  RC522关闭天线
+ * @param  无
+ * @retval 无
+ */
 void MFRC522_AntennaOff(void) {
 	MFRC522_ClearBitMask(MFRC522_REG_TX_CONTROL, 0x03);
 }
 
-// 命令卡片进入休眠状态
+/**
+ * @brief  命令卡片进入休眠状态
+ * @param  无
+ * @retval 无
+ */
 void MFRC522_Halt(void) {
 	uint16_t unLen;
 	uint8_t buff[4]; 
