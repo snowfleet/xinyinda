@@ -2,6 +2,7 @@
 #include "LCD_Show.h"
 
 
+
 static void LCD_Show_Init(void)
 {
     SPI_LCD_Init();
@@ -17,6 +18,7 @@ void LCD_Show_Task(void* param)
     
     LCD_Show_Init();
     Servo_Init();
+    MFRC522_Init();
 	volatile int i = 0;
     char Text[20];
     HAL_TIM_Base_Start(&htim3);
@@ -32,9 +34,12 @@ void LCD_Show_Task(void* param)
     motor_encoder_t Encoder;
 
     uint16_t Angle = 90;
-    int8_t dir = 1;         //0表示在左边，1表示在正中间， -1表示在右边
+    int8_t dir = 1;
 
     uint32_t last_time = 0;
+    
+    uint8_t CardID[5];
+    uint8_t card_found = 0;
     
     while (1)
     {
@@ -83,7 +88,21 @@ void LCD_Show_Task(void* param)
         irtacking_Read(&s1,&s2,&s3,&s4,&s5,&s6,&s7,&s8);
         snprintf(Text, sizeof(Text), "%d%d%d%d%d%d%d%d", s1,s2,s3,s4,s5,s6,s7,s8);
         LCD_DisplayText(10, 80, Text);
-        
+
+        if(MFRC522_Check(CardID) == MI_OK)
+        {
+            snprintf(Text, sizeof(Text), "RC522:%02X%02X%02X%02X", CardID[0],CardID[1],CardID[2],CardID[3]);
+            LCD_DisplayText(10, 100, Text);
+            card_found = 1;
+        }
+        else
+        {
+            if(card_found)
+            {
+                LCD_DisplayText(10, 100, "No Card         ");
+                card_found = 0;
+            }
+        }
         
         vTaskDelay(pdMS_TO_TICKS(500));
     }
