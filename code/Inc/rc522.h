@@ -1,3 +1,4 @@
+#include "stdint.h"
 // Mifare RC522 RFID Card reader 13.56 MHz
 // STM32F103 RFID RC522 SPI3 / UART / USB / Keil HAL
 

@@ -14,6 +14,8 @@
 
 #include "Headfile.h"
 #include "rc522.h"
+#include "spi.h"
+#include "stdint.h"
 
 extern SPI_HandleTypeDef hspi1;
 

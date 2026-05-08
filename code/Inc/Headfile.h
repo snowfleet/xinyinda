@@ -10,6 +10,7 @@
 
 #include "stm32f4xx_hal.h"
 #include "stm32f4xx_hal_def.h"
+#include "stm32f4xx_it.h"
 #include "i2c.h"
 #include "gpio.h"
 #include "spi.h"
@@ -17,7 +18,11 @@
 #include "freertos.h"
 #include "task.h"
 #include "queue.h"
+#include "semphr.h"
+#include "cmsis_os.h"
 #include "main.h"
+#include "usart.h"
+#include "dma.h"
 
 #include "Typies.h"
 #include "Delay.h"
@@ -30,6 +35,7 @@
 #include "Servo.h"
 #include "irtracking.h"
 #include "rc522.h"
+#include "su_03t.h"
 
 
 
