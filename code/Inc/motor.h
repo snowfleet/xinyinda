@@ -24,5 +24,6 @@ void Motor_Init(void);
 uint16_t Motor_Get_Vol(void);
 void Motor_Get_Encoder(motor_encoder_t* Encoder);
 void Motor_Reset_Encoder(void);
+void Motion_Ctrl(int Vx, int Vy, int W, int Vz);
 
 #endif

@@ -77,3 +77,30 @@ void Motor_Reset_Encoder(void)
     int8_t EncodeReset[16]={0};   								//用于重置脉冲值
     I2C_Write_Len(MOTOR_ENCODER_TOTAL_ADDR,EncodeReset,16);		//重置脉冲值
 }
+
+
+
+// 麦克纳姆轮运动控制
+// Vx: 前进速度, Vy: 横移速度(巡线不用), W: 旋转量(PID输出), Vz: 附加速度
+void Motion_Ctrl(int Vx, int Vy, int W, int Vz)
+{
+    motor_speed_t speed;
+    int temp;
+    
+    // 麦克纳姆轮逆运动学公式（根据你的电机布局）
+    // m1(A右前)  m2(B左前)
+    // m3(A右后)  m4(B左后)
+    temp = Vx - Vy + W;
+    speed.speed_m1 = (temp > 100) ? 100 : ((temp < -100) ? -100 : temp);  // 右前
+    
+    temp = Vx + Vy - W;
+    speed.speed_m2 = (temp > 100) ? 100 : ((temp < -100) ? -100 : temp);  // 左前
+    
+    temp = Vx + Vy + W;
+    speed.speed_m3 = (temp > 100) ? 100 : ((temp < -100) ? -100 : temp);  // 右后
+    
+    temp = Vx - Vy - W;
+    speed.speed_m4 = (temp > 100) ? 100 : ((temp < -100) ? -100 : temp);  // 左后
+    
+    Motor_Set_Speed(speed);
+}
